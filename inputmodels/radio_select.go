@@ -62,7 +62,7 @@ func (rs radioSelect) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ":
 			rs.selected = rs.choices[rs.cursor]
 		case "enter":
-			if err := rs.onEnter(rs.selected); err != nil {
+			if err := rs.onEnter(rs.values[rs.cursor]); err != nil {
 				return rs, tea.Quit
 			}
 			return rs.next()

@@ -71,9 +71,7 @@ func (m loader) View() string {
 }
 
 func tickCmd() tea.Cmd {
-	l := log.New(os.Stderr, "", 0)
 	return tea.Tick(time.Millisecond*500, func(t time.Time) tea.Msg {
-		l.Println("tick")
 		return tickMsg(t)
 	})
 }

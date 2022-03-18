@@ -2,10 +2,20 @@ package project
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path"
+
+	"github.com/muesli/termenv"
+)
+
+var (
+	term = termenv.ColorProfile()
+)
+
+const (
+	blueFg = "36"
+	redFg  = "31"
 )
 
 type Configuration struct {
@@ -14,25 +24,18 @@ type Configuration struct {
 	Dependencies   map[string]struct{}
 	processedDeps  int
 	vendorFinished bool
-	log            *log.Logger
 	currentCmd     string
 }
 
-func NewConfiguration() *Configuration {
-	strpath, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
+func NewConfiguration(strpath string) *Configuration {
 	name := path.Base(strpath)
 	if name == "." || name == "/" {
 		name = "default"
 	}
-	l := log.New(os.Stderr, "", 0)
 	return &Configuration{
 		Name:         name,
 		DoVendor:     false,
 		Dependencies: map[string]struct{}{},
-		log:          l,
 	}
 }
 
@@ -53,28 +56,29 @@ func (c *Configuration) CalculateProgress() float64 {
 }
 
 func (c *Configuration) Start() (err error) {
-	c.currentCmd = "Creating folders..."
+	c.currentCmd = "Creating folders...\n\n"
 	err = c.createFolders()
 	if err != nil {
 		return
 	}
-	c.currentCmd = "Initializing mod..."
+	c.currentCmd = "Initializing mod...\n\n"
 	err = c.modInit()
 	if err != nil {
 		return
 	}
+	c.currentCmd = c.currentCmd + "Installing dependencies...\n\n"
 	err = c.installDependencies()
 	if err != nil {
 		return
 	}
 	if c.DoVendor {
-		c.currentCmd = "Vendoring..."
+		c.currentCmd = c.currentCmd + "Vendoring...\n\n"
 		err = c.vendor()
 		if err != nil {
 			return
 		}
 	}
-	c.currentCmd = "Finished!"
+	c.currentCmd = c.currentCmd + "Finished!"
 	return nil
 }
 
@@ -98,15 +102,29 @@ func (c *Configuration) createFolders() (err error) {
 }
 
 func (c *Configuration) modInit() (err error) {
-	return exec.Command("go", "mod", "init", c.Name).Run()
+	err = exec.Command("go", "mod", "init", c.Name).Run()
+	if err != nil {
+		c.currentCmd = fmt.Sprintf(
+			"Failed to run command: %s\nError: %s",
+			colorFg(fmt.Sprintf("go mod init %s", c.Name), blueFg),
+			colorFg(err.Error(), redFg),
+		)
+	}
+	return
 }
 
 func (c *Configuration) installDependencies() (err error) {
 	for dep := range c.Dependencies {
-		c.currentCmd = fmt.Sprint("Getting dependency: ", dep)
+		startingCmd := c.currentCmd
+		c.currentCmd = startingCmd + fmt.Sprintf("Getting dependency: %s\n", colorFg(dep, blueFg))
 		err = exec.Command("go", "get", dep).Run()
 		if err != nil {
-			c.log.Printf("Failed to get dependency: %s\nError: %s", dep, err.Error())
+			//log and continue
+			c.currentCmd = startingCmd + fmt.Sprintf(
+				"Failed to get dependency:%s => %s\n",
+				colorFg(dep, blueFg),
+				colorFg("Check if it exists", redFg),
+			)
 		}
 		c.processedDeps++
 	}
@@ -120,4 +138,8 @@ func (c *Configuration) vendor() (err error) {
 	}
 	c.vendorFinished = true
 	return nil
+}
+
+func colorFg(val, color string) string {
+	return termenv.String(val).Foreground(term.Color(color)).String()
 }

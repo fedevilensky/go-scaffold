@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -13,11 +12,29 @@ import (
 )
 
 func main() {
-	proj := project.NewConfiguration()
+	var strpath string
+	args := os.Args[1:]
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(args) > 0 {
+		strpath = args[0]
+		if err := os.MkdirAll(strpath, 0755); err != nil {
+			log.Fatal(err)
+		}
+		if err := os.Chdir(strpath); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		strpath = pwd
+	}
+
+	proj := project.NewConfiguration(strpath)
 	p := tea.NewProgram(projectName(proj))
+
 	if err := p.Start(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Error: %v\n", err)
 	}
 }
 
@@ -90,12 +107,14 @@ func otherPackages(proj *project.Configuration) tea.Model {
 }
 
 func selectVendoring(proj *project.Configuration) tea.Model {
+	choices := []string{"Yes", "No"}
+	values := []string{"yes", "no"}
 	opts := inputmodels.RadioSelectOptions{
 		Header:  "Do you want to use vendoring?",
-		Choices: []string{"Yes", "No"},
-		Values:  []string{"yes", "no"},
+		Choices: choices,
+		Values:  values,
 		OnEnter: func(selection string) error {
-			if selection == "yes" {
+			if selection == values[0] {
 				proj.DoVendor = true
 			} else {
 				proj.DoVendor = false
