@@ -19,3 +19,7 @@ Every file and folder will be created at the end, so feel free to quit and start
 ## TODO
 - Confirmation dialog with configuration summary
 - Edit configuration
+
+
+----------
+Logo created with [Gopher Konstructor](https://github.com/quasilyte/gopherkon), based on Renee French's design
