@@ -25,6 +25,7 @@ type Configuration struct {
 	processedDeps  int
 	vendorFinished bool
 	currentCmd     string
+	Template       func(*Configuration) error
 }
 
 func NewConfiguration(strpath string) *Configuration {
@@ -71,6 +72,13 @@ func (c *Configuration) Start() (err error) {
 	if err != nil {
 		return
 	}
+	if c.Template != nil {
+		c.currentCmd = c.currentCmd + "Creating helper methods and middlewares in pkg/...\n\n"
+		err = c.Template(c)
+		if err != nil {
+			return
+		}
+	}
 	if c.DoVendor {
 		c.currentCmd = c.currentCmd + "Vendoring...\n\n"
 		err = c.vendor()
@@ -83,11 +91,11 @@ func (c *Configuration) Start() (err error) {
 }
 
 func (c *Configuration) createFolders() (err error) {
-	dirs := []string{"./src/models",
-		"./src/services",
-		"./src/controllers",
-		"./src/repositories",
-		"./src/routers",
+	dirs := []string{"./internal/models",
+		"./internal/services",
+		"./internal/controllers",
+		"./internal/repositories",
+		"./internal/routers",
 		"./cmd",
 		"./scripts",
 		"./docs",
@@ -127,6 +135,9 @@ func (c *Configuration) installDependencies() (err error) {
 			)
 		}
 		c.processedDeps++
+	}
+	if len(c.Dependencies) > 0 {
+		c.currentCmd = c.currentCmd + "Finished installing dependencies!\n\n"
 	}
 	return nil
 }

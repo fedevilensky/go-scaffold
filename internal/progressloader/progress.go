@@ -9,8 +9,8 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/fedevilensky/go-scaffold/inputmodels"
-	"github.com/fedevilensky/go-scaffold/project"
+	"github.com/fedevilensky/go-scaffold/internal/inputmodels"
+	"github.com/fedevilensky/go-scaffold/internal/project"
 )
 
 const (
