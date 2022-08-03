@@ -1,4 +1,9 @@
 # go-scaffold
+[![Go Reference](https://pkg.go.dev/badge/github.com/fedevilensky/go-scaffold.svg)](https://pkg.go.dev/github.com/fedevilensky/go-scaffold)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fedevilensky/go-scaffold)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/fedevilensky/go-scaffold)
+
+
 ![alt](go-scaffold.png)
 
 Tool to create project scaffold and provides some boilerplate in case of using gin, fiber or net/http
