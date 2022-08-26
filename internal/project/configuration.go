@@ -18,14 +18,21 @@ const (
 	redFg  = "31"
 )
 
+type template interface {
+	Build(c *Configuration) error
+}
+
 type Configuration struct {
 	Name           string
+	WebLibrary     string
 	DoVendor       bool
 	Dependencies   map[string]struct{}
+	DBProvider     string
+	DBLibrary      string
 	processedDeps  int
 	vendorFinished bool
 	currentCmd     string
-	Template       func(*Configuration) error
+	Template       template
 }
 
 func NewConfiguration(strpath string) *Configuration {
@@ -74,7 +81,7 @@ func (c *Configuration) Start() (err error) {
 	}
 	if c.Template != nil {
 		c.currentCmd = c.currentCmd + "Creating helper methods and middlewares in pkg/...\n\n"
-		err = c.Template(c)
+		err = c.Template.Build(c)
 		if err != nil {
 			return
 		}
@@ -122,7 +129,17 @@ func (c *Configuration) modInit() (err error) {
 }
 
 func (c *Configuration) installDependencies() (err error) {
-	for dep := range c.Dependencies {
+	deps := c.Dependencies
+	if c.WebLibrary != WebLibraryNone {
+		deps[c.WebLibrary] = struct{}{}
+	}
+	if c.DBLibrary != DBLibraryNone {
+		deps[c.DBLibrary] = struct{}{}
+	}
+	if c.DBProvider != DBProviderNone {
+		deps[c.DBProvider] = struct{}{}
+	}
+	for dep := range deps {
 		startingCmd := c.currentCmd
 		c.currentCmd = startingCmd + fmt.Sprintf("Getting dependency: %s\n", colorFg(dep, blueFg))
 		err = exec.Command("go", "get", dep).Run()
@@ -136,7 +153,7 @@ func (c *Configuration) installDependencies() (err error) {
 		}
 		c.processedDeps++
 	}
-	if len(c.Dependencies) > 0 {
+	if len(deps) > 0 {
 		c.currentCmd = c.currentCmd + "Finished installing dependencies!\n\n"
 	}
 	return nil

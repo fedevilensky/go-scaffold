@@ -1,0 +1,96 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+
+	"{{.Name}}/helloworld/logicerrors"
+	"{{.Name}}/internal/models"
+	"{{.Name}}/pkg/httphelpers"
+)
+
+type FiberHelloWorldHandler struct {
+	logic HelloWorldLogic
+}
+
+type HelloWorldLogic interface {
+	Greet(ctx context.Context, user *models.User, saveUser bool) (string, error)
+	GetUserByName(ctx context.Context, name string) (models.User, error)
+	ListUsers(ctx context.Context) ([]models.User, error)
+}
+
+func NewHelloWorldHandler(logic HelloWorldLogic) *FiberHelloWorldHandler {
+	return &FiberHelloWorldHandler{
+		logic: logic,
+	}
+}
+
+// post /helloworld
+func (h *FiberHelloWorldHandler) Greet() fiber.Handler {
+	// you might want to do some processing before returning the handlerFunc,
+	// for example if you use a regex, you might want to compile it beforehand
+	return func(c *fiber.Ctx) error {
+		var userInput struct {
+			Name string `json:"name"`
+		}
+		if err := httphelpers.JSONDecode(c, &userInput); err != nil {
+			httphelpers.StatusBadRequestResponse(c, err.Error())
+			return nil
+		}
+
+		user := models.User{Name: userInput.Name}
+		saveUser, err := strconv.ParseBool(c.Query("save", "false"))
+		if err != nil {
+			httphelpers.StatusBadRequestResponse(c, "user not found")
+			return nil
+		}
+
+		helloStr, err := h.logic.Greet(c.Context(), &user, saveUser)
+		if err != nil {
+			httphelpers.StatusInternalServerErrorResponse(c, err)
+			return nil
+		}
+
+		httphelpers.StatusOKJSONPayloadResponse(c, fiber.Map{"message": helloStr})
+
+		return nil
+	}
+}
+
+// get /helloworld/:name
+func (h *FiberHelloWorldHandler) GetUserByName() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		name := c.Params("name")
+
+		user, err := h.logic.GetUserByName(c.Context(), name)
+		if err != nil {
+			switch {
+			case errors.Is(err, logicerrors.ErrUserDoesNotExist):
+				httphelpers.StatusBadRequestResponse(c, "user not found")
+			default:
+				httphelpers.StatusInternalServerErrorResponse(c, err)
+			}
+			return nil
+		}
+
+		httphelpers.StatusOKJSONPayloadResponse(c, user)
+		return nil
+	}
+}
+
+// get /helloworld
+func (h *FiberHelloWorldHandler) ListUsers() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		users, err := h.logic.ListUsers(c.Context())
+		if err != nil {
+			httphelpers.StatusInternalServerErrorResponse(c, err)
+			return nil
+		}
+
+		httphelpers.StatusOKJSONPayloadResponse(c, users)
+		return nil
+	}
+}

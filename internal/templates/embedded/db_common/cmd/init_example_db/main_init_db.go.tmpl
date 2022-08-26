@@ -1,0 +1,13 @@
+package main
+
+import (
+	"log"
+	{{template "db_imports_init"}}
+	{{template "db_driver_import"}}
+)
+
+func main(){
+	{{template "connect_to_db_init"}}
+	
+	{{template "create_table_init"}}
+}

@@ -1,0 +1,13 @@
+{{define "db_imports"}}
+	"gorm.io/gorm"
+{{end}}
+
+{{define "define_db_and_repo"}}
+	{{template "db_connection"}}
+	db, err := gorm.Open(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	helloWorldRepo := repo.NewGormRepo(db)
+{{end}}

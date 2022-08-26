@@ -1,0 +1,16 @@
+{{define "db_imports_init"}}
+	"gorm.io/gorm"
+   "{{.Name}}/internal/models"
+{{end}}
+
+{{define "connect_to_db_init"}}
+   {{template "db_connection"}}
+	db, err := gorm.Open(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+{{end}}
+
+{{define "create_table_init"}}
+   db.AutoMigrate(&models.User{})
+{{end}}

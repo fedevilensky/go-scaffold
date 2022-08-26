@@ -1,0 +1,28 @@
+{{define "db_driver_import"}}
+	_ "github.com/lib/pq"
+{{end}}
+
+{{define "dsn"}}
+	dsn := "user=foo password=bar dbname=foobar host=localhost port=5432 sslmode=disable"
+{{end}}
+
+{{define "driver"}}"postgres"{{end}}
+
+{{define "init_sql"}}
+	query := `CREATE TABLE users (
+					id BIGSERIAL NOT NULL PRIMARY KEY,
+					name TEXT NOT NULL UNIQUE,
+					registered_at timestamp NOT NULL DEFAULT NOW()
+				);`
+{{end}}
+
+{{define "insert_query"}}
+	query := `INSERT INTO users (name)
+				VALUES($1)
+				ON CONFLICT(name) DO NOTHING`
+{{end}}
+
+{{define "get_user_query"}}
+	query := `SELECT name, id, registered_at FROM users
+				WHERE name = $1`
+{{end}}

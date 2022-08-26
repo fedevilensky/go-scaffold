@@ -1,0 +1,178 @@
+package httphelpers
+
+import (
+	"context"
+	"encoding/json"
+	"encoding/xml"
+	"errors"
+	"net/http"
+)
+
+type ErrorKeyType string
+
+const (
+	ErrorKey = ErrorKeyType("error")
+)
+
+type ContentType string
+
+var (
+	ErrInvalidPayloadType = errors.New("invalid payload type")
+	ErrUnknownContentType = errors.New("unknown content type")
+)
+
+const (
+	ContentTypeJSON ContentType = "application/json"
+	ContentTypeXML  ContentType = "application/xml"
+	ContentTypeHTML ContentType = "text/html"
+)
+
+// StatusOKResponse sets an empty 200 response
+func StatusOKResponse(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+}
+
+// StatusCreatedResponse sets a 201 response and loads a JSON payload containing `{"id":id}`
+func StatusCreatedResponse[T int | int64 | string](w http.ResponseWriter, id T) {
+	CustomStatusJSONPayloadResponse(w, http.StatusCreated, map[string]T{"id": id})
+}
+
+// StatusNoContentResponse sets an empy 204 response
+func StatusNoContentResponse(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// StatusBadRequestResponse sets a 400 response and loads a JSON payload containing
+// `{"error":"msg"}“
+func StatusBadRequestResponse(w http.ResponseWriter, msg string) {
+	CustomStatusJSONPayloadResponse(w, http.StatusBadRequest,
+		map[string]string{"error": msg})
+}
+
+// StatusUnauthorizedResponse sets a 401 response and loads a JSON payload containing
+// `{"error":"unauthorized"}“
+func StatusUnauthorizedResponse(w http.ResponseWriter) {
+	CustomStatusJSONPayloadResponse(w, http.StatusUnauthorized,
+		map[string]string{"error": "unauthorized"})
+}
+
+// StatusForbiddenResponse sets a 403 response and loads a JSON payload containing
+// `{"error":"forbidden"}“
+func StatusForbiddenResponse(w http.ResponseWriter) {
+	CustomStatusJSONPayloadResponse(w, http.StatusForbidden,
+		map[string]string{"error": "forbidden"})
+}
+
+// StatusNotFoundResponse sets a 404 response and loads a JSON payload containing
+// `{"error":"not found"}“
+func StatusNotFoundResponse(w http.ResponseWriter) {
+	CustomStatusJSONPayloadResponse(w, http.StatusNotFound,
+		map[string]string{"error": "not found"})
+}
+
+// StatusConflictResponse sets a 409 response and loads a JSON payload containing
+// `{"error":"the resource you are trying to edit has been modified by another user, please try again"}“
+func StatusConflictResponse(w http.ResponseWriter) {
+	CustomStatusJSONPayloadResponse(w, http.StatusConflict,
+		map[string]string{"error": "the resource you are trying to edit has been modified by another user, please try again"})
+}
+
+// StatusUnprocesableEntities sets a 422 response and loads a payload containing the errors
+func StatusUnprocesableEntities(w http.ResponseWriter, errors map[string]string) {
+	CustomStatusJSONPayloadResponse(w, http.StatusUnprocessableEntity,
+		map[string]interface{}{"errors": errors})
+}
+
+// StatusInternalServerErrorResponse sets an empty 500 response and loads errors into context,
+// in order to be accessible to middlewares
+func StatusInternalServerErrorResponse(w http.ResponseWriter, r *http.Request, err error) *http.Request {
+	ctx := context.WithValue(r.Context(), ErrorKey, err)
+
+	w.WriteHeader(http.StatusInternalServerError)
+
+	return r.WithContext(ctx)
+}
+
+// StatusOKJSONPayloadResponse is a shorthand for CustomStatusJSONPayloadResponse with status 200
+//
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(http.StatusOK, payload)
+func StatusOKJSONPayloadResponse(w http.ResponseWriter, payload any) error {
+	return CustomStatusJSONPayloadResponse(w, http.StatusOK, payload)
+}
+
+// StatusCreatedJSONPayloadResponse is a shorthand for CustomStatusJSONPayloadResponse with status 201
+//
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(http.StatusCreated, payload)
+func StatusCreatedJSONPayload(w http.ResponseWriter, payload any) error {
+	return CustomStatusJSONPayloadResponse(w, http.StatusCreated, payload)
+}
+
+// StatusBadRequestJSONPayloadResponse is a shorthand for CustomStatusJSONPayloadResponse with status 400
+//
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(http.StatusBadRequest, payload)
+func StatusBadRequestJSONPayloadResponse(w http.ResponseWriter, payload any) error {
+	return CustomStatusJSONPayloadResponse(w, http.StatusBadRequest, payload)
+}
+
+// StatusUnauthorizedJSONPayloadResponse is a shorthand for CustomStatusJSONPayloadResponse with status 401
+//
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(http.StatusUnauthorized, payload)
+func StatusUnauthorizedJSONPayloadResponse(w http.ResponseWriter, payload any) error {
+	return CustomStatusJSONPayloadResponse(w, http.StatusUnauthorized, payload)
+}
+
+// StatusJSONPayloadResponse is a shorthand for CustomStatusJSONPayloadResponse with status 403
+//
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(http.StatusForbidden, payload)
+func StatusForbiddenJSONPayloadResponse(w http.ResponseWriter, payload any) error {
+	return CustomStatusJSONPayloadResponse(w, http.StatusForbidden, payload)
+}
+
+// StatusNotFoundResponse is a shorthand for CustomStatusPayloadResponse with status 404
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(http.StatusNotFound, payload)
+func StatusNotFoundPayloadResponse(w http.ResponseWriter, payload any) {
+	CustomStatusPayloadResponse(w, http.StatusNotFound, payload, ContentTypeJSON)
+}
+
+// CustomStatusJSONPayloadResponse is a shorthand for CustomStatusPayloadResponse with ContentTypeJSON
+//
+// If you do not wish to handle the error, and are ok with a 400 response on error, feel free to use c.JSON(status, payload)
+func CustomStatusJSONPayloadResponse(w http.ResponseWriter, status int, payload any) error {
+	return CustomStatusPayloadResponse(w, status, payload, ContentTypeJSON)
+}
+
+// If you do not want to handle the error, and are ok with a 400 response on error, feel free to use gin context's functions
+// such as c.JSON, c.XML, etc.
+// Valid ContentType: "application/json", "application/xml", "text/html"
+//
+// "text/html" expects a string as payload
+func CustomStatusPayloadResponse(w http.ResponseWriter, status int, payload any, contentType ContentType) error {
+	var (
+		pL  = []byte{}
+		err error
+	)
+	switch contentType {
+	case ContentTypeJSON:
+		pL, err = json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+	case ContentTypeXML:
+		pL, err = xml.Marshal(payload)
+		if err != nil {
+			return err
+		}
+	case ContentTypeHTML:
+		str, ok := payload.(string)
+		if !ok {
+			return ErrInvalidPayloadType
+		}
+		pL = []byte(str)
+	default:
+		return ErrUnknownContentType
+	}
+	w.WriteHeader(status)
+	w.Header().Add("Content-Type", string(contentType))
+	_, err = w.Write(pL)
+	return err
+}

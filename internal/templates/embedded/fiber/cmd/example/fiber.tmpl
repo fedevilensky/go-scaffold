@@ -1,0 +1,25 @@
+{{define "server_imports"}}
+	"github.com/gofiber/fiber/v2"
+{{end}}
+
+{{define "make_router"}}
+	r := fiber.New()
+{{end}}
+
+{{define "start_server"}}
+	err = r.Listen(":4000")
+{{end}}
+
+{{define "makeRoutes_func"}}
+func makeRoutes(r *fiber.App, handler *handlers.FiberHelloWorldHandler){
+	v1 := r.Group("/v1")
+	{
+		helloworld := v1.Group("/helloworld")
+		{
+			helloworld.Post("", handler.Greet())
+			helloworld.Get("", handler.ListUsers())
+			helloworld.Get("/:name", handler.GetUserByName())
+		}
+	}
+}
+{{end}}

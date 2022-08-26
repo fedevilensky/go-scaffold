@@ -11,7 +11,6 @@ import (
 type textInput struct {
 	textInput    textinput.Model
 	header       string
-	placeholder  string
 	onEnter      func(input string) error
 	onEnterEmpty func() error
 	next         func() (tea.Model, tea.Cmd)

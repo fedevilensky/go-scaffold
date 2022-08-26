@@ -1,0 +1,31 @@
+package main
+
+import (
+	{{template "db_imports"}}
+	{{template "db_driver_import"}}
+	{{template "server_imports"}}
+	"{{.Name}}/helloworld/repo"
+	"{{.Name}}/helloworld/logic"
+	"{{.Name}}/helloworld/handlers"
+
+	"log"
+)
+
+func main() {
+	var err error
+
+	{{template "define_db_and_repo"}}
+
+	helloWorldLogic := logic.NewHelloWorldLogic(helloWorldRepo)
+	helloWorldHandler := handlers.NewHelloWorldHandler(helloWorldLogic)
+
+	{{template "make_router"}}
+	makeRoutes(r, helloWorldHandler)
+
+	{{template "start_server"}}
+	if err != nil{
+		log.Fatal(err)
+	}
+}
+
+{{template "makeRoutes_func"}}

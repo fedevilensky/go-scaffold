@@ -1,0 +1,86 @@
+package repo
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"{{.Name}}/helloworld/repositoryerrors"
+	"{{.Name}}/internal/models"
+)
+
+type sqlRepo struct {
+	db *sql.DB
+}
+
+func NewSqlRepo(db *sql.DB) *sqlRepo {
+	return &sqlRepo{
+		db: db,
+	}
+}
+
+func (r *sqlRepo) SaveGreetedUser(ctx context.Context, user *models.User) error {
+	{{template "insert_query"}}
+
+	result, err := r.db.QueryContext(ctx, query, user.Name)
+	if err != nil {
+		return err
+	}
+
+	err = result.Scan(&user.ID, user.RegisteredAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *sqlRepo) GetUser(ctx context.Context, name string) (models.User, error) {
+	var user models.User
+	{{template "get_user_query"}}
+	values := []any{&user.Name, &user.ID, &user.RegisteredAt}
+
+	result, err := r.db.QueryContext(ctx, query, name)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return models.User{}, repositoryerrors.ErrRecordNotFound
+		default:
+			return models.User{}, err
+		}
+	}
+
+	err = result.Scan(values...)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
+
+}
+
+func (r *sqlRepo) GetAllGreetedUsers(ctx context.Context) ([]models.User, error) {
+	var users []models.User
+	query := `SELECT name, id, registered_at
+				FROM users`
+
+	result, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return []models.User{}, nil
+		default:
+			return []models.User{}, err
+		}
+	}
+
+	for result.Next() {
+		var user models.User
+		err := result.Scan(&user.Name, &user.ID, &user.RegisteredAt)
+		if err != nil {
+			return []models.User{}, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}

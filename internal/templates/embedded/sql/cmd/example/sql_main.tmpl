@@ -1,0 +1,13 @@
+{{define "db_imports"}}
+	"database/sql"
+{{end}}
+
+{{define "define_db_and_repo"}}
+	{{template "dsn"}}
+	db, err := sql.Open({{template "driver"}}, dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	helloWorldRepo := repo.NewSqlRepo(db)
+{{end}}

@@ -21,9 +21,9 @@ Use arrows (or `j` and `k`) to navigate, space to select, `q` to quit and enter 
 
 Every file and folder will be created at the end, so feel free to quit and start over
 
-## TODO
-- Confirmation dialog with configuration summary
-- Edit configuration
+
+## Known problems
+Will panic if go mod already exists
 
 
 ----------

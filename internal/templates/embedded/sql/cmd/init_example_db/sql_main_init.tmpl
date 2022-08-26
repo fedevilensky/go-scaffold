@@ -1,0 +1,19 @@
+{{define "db_imports_init"}}
+	"database/sql"
+{{end}}
+
+{{define "connect_to_db_init"}}
+  {{template "dsn"}}
+	db, err := sql.Open({{template "driver"}}, dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+{{end}}
+
+{{define "create_table_init"}}
+   {{template "init_sql"}}
+   _, err = db.Exec(query)
+   if err != nil{
+      log.Fatal
+   }
+{{end}}

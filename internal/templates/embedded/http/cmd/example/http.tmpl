@@ -1,0 +1,45 @@
+{{define "server_imports"}}
+	"net/http"
+	"{{.Name}}/pkg/httphelpers"
+{{end}}
+
+{{define "make_router"}}
+	r := http.NewServeMux()
+{{end}}
+
+{{define "start_server"}}
+	srv:= &http.Server{
+		Addr: ":4000",
+		Handler: r,
+	}
+
+	err =  srv.ListenAndServe()
+{{end}}
+
+{{define "makeRoutes_func"}}
+func makeRoutes(r *http.ServeMux, handler *handlers.HttpHelloWorldHandler){
+	greet := handler.Greet()
+	listUsers := handler.ListUsers()
+	getUserByName := handler.GetUserByName()
+	
+	r.HandleFunc("/v1/helloworld", func(w http.ResponseWriter, r *http.Request){
+		switch r.Method {
+		case http.MethodPost:
+			greet(w, r)
+		case http.MethodGet:
+			listUsers(w,r)
+		default:
+			httphelpers.StatusNotFoundResponse(w)
+		}
+	})
+	
+	r.HandleFunc("/v1/helloworld/", func(w http.ResponseWriter, r *http.Request){
+		switch r.Method {
+		case http.MethodGet:
+			getUserByName(w, r)
+		default:
+			httphelpers.StatusNotFoundResponse(w)
+		}
+	})
+}
+{{end}}

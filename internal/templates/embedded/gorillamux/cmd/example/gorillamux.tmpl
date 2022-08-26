@@ -1,0 +1,31 @@
+{{define "server_imports"}}
+	"github.com/gorilla/mux"
+	"net/http"
+{{end}}
+
+{{define "make_router"}}
+	r := mux.NewRouter()
+{{end}}
+
+{{define "start_server"}}
+	srv := &http.Server{
+		Addr: ":4000",
+		Handler: r,
+	}
+
+	err = srv.ListenAndServe()
+{{end}}
+
+{{define "makeRoutes_func"}}
+func makeRoutes(r *mux.Router, handler *handlers.GorillaMuxHelloWorldHandler){
+	v1 := r.PathPrefix("/v1").Subrouter()
+	{
+		helloworld := v1.PathPrefix("/helloworld").Subrouter()
+		{
+			helloworld.HandleFunc("", handler.Greet()).Methods(http.MethodPost)
+			helloworld.HandleFunc("", handler.ListUsers()).Methods(http.MethodGet)
+			helloworld.HandleFunc("{name}", handler.GetUserByName()).Methods(http.MethodGet)
+		}
+	}
+}
+{{end}}

@@ -1,0 +1,28 @@
+{{define "db_driver_import"}}
+	_ "github.com/go-sql-driver/mysql"
+{{end}}
+
+{{define "dsn"}}
+	dsn := "username:password@/databasename?parseTime=true"
+{{end}}
+
+{{define "driver"}}"mysql"{{end}}
+
+{{define "init_sql"}}
+	query:=`CREATE TABLE example.users (
+					id BIGINT UNSIGNED auto_increment NOT NULL PRIMARY KEY,
+					name varchar(100) NOT NULL UNIQUE,
+					registered_at DATETIME DEFAULT NOW() NOT NULL
+				);`
+{{end}}
+
+{{define "insert_query"}}
+   query := `INSERT INTO users (name)
+				VALUES(?)
+				 ON DUPLICATE KEY UPDATE id=id`
+{{end}}
+
+{{define "get_user_query"}}
+	query := `SELECT name, id, registered_at FROM users
+				WHERE name = ?`
+{{end}}

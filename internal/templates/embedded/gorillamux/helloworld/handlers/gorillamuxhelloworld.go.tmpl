@@ -1,0 +1,92 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
+
+	"{{.Name}}/helloworld/logicerrors"
+	"{{.Name}}/pkg/httphelpers"
+	"{{.Name}}/internal/models"
+)
+
+type GorillaMuxHelloWorldHandler struct {
+	logic HelloWorldLogic
+}
+
+type HelloWorldLogic interface {
+	Greet(ctx context.Context, user *models.User, saveUser bool) (string, error)
+	GetUserByName(ctx context.Context, name string) (models.User, error)
+	ListUsers(ctx context.Context) ([]models.User, error)
+}
+
+func NewHelloWorldHandler(logic HelloWorldLogic) *GorillaMuxHelloWorldHandler {
+	return &GorillaMuxHelloWorldHandler{
+		logic: logic,
+	}
+}
+
+// post /helloworld
+func (h *GorillaMuxHelloWorldHandler) Greet() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var userInput struct {
+			Name string `json:"name"`
+		}
+		if err := httphelpers.JSONDecode(w, r, &userInput); err != nil {
+			httphelpers.StatusBadRequestResponse(w, err.Error())
+			return
+		}
+
+		queryParams := r.URL.Query()
+
+		user := models.User{Name: userInput.Name}
+		saveUser, err := strconv.ParseBool(queryParams.Get("save"))
+		if err != nil {
+			httphelpers.StatusBadRequestResponse(w, "user not found")
+			return
+		}
+
+		helloStr, err := h.logic.Greet(r.Context(), &user, saveUser)
+		if err != nil {
+			httphelpers.StatusInternalServerErrorResponse(w, r, err)
+			return
+		}
+
+		httphelpers.StatusOKJSONPayloadResponse(w, map[string]any{"message": helloStr})
+	}
+}
+
+// get /helloworld/:name
+func (h *GorillaMuxHelloWorldHandler) GetUserByName() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name := mux.Vars(r)["name"]
+
+		user, err := h.logic.GetUserByName(r.Context(), name)
+		if err != nil {
+			switch {
+			case errors.Is(err, logicerrors.ErrUserDoesNotExist):
+				httphelpers.StatusBadRequestResponse(w, "user not found")
+			default:
+				httphelpers.StatusInternalServerErrorResponse(w, r, err)
+			}
+			return
+		}
+
+		httphelpers.StatusOKJSONPayloadResponse(w, user)
+	}
+}
+
+func (h *GorillaMuxHelloWorldHandler) ListUsers() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		users, err := h.logic.ListUsers(r.Context())
+		if err != nil {
+			httphelpers.StatusInternalServerErrorResponse(w, r, err)
+			return
+		}
+
+		httphelpers.StatusOKJSONPayloadResponse(w, users)
+	}
+}

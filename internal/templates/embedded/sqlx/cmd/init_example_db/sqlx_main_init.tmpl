@@ -1,0 +1,16 @@
+{{define "db_imports_init"}}
+	"github.com/jmoiron/sqlx"
+{{end}}
+
+{{define "connect_to_db_init"}}
+	{{template "dsn"}}
+	db, err := sqlx.Connect({{template "driver"}}, dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+{{end}}
+
+{{define "create_table_init"}}
+	{{template "init_sql"}}
+	db.MustExec(query)
+{{end}}

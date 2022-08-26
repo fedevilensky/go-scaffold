@@ -21,6 +21,7 @@ const (
 type loader struct {
 	conf     *project.Configuration
 	progress progress.Model
+	once     bool
 }
 type tickMsg time.Time
 
@@ -48,7 +49,11 @@ func (m loader) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tickMsg:
 		if m.progress.Percent() == 1.0 {
-			return m, tea.Quit
+			if !m.once {
+				m.once = true
+			} else {
+				return m, tea.Quit
+			}
 		}
 		cmd := m.progress.SetPercent(m.calculatePercent())
 		return m, tea.Batch(tickCmd(), cmd)

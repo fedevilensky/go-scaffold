@@ -1,0 +1,8 @@
+{{define "db_driver_import"}}
+	"gorm.io/driver/postgres"
+{{end}}
+
+{{define "db_connection"}}
+	dsn := "user=foo password=bar dbname=foobar host=localhost port=5432 sslmode=disable"
+	conn := postgres.Open(dsn)
+{{end}}

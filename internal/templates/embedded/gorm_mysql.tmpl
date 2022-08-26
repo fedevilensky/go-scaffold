@@ -1,0 +1,8 @@
+{{define "db_driver_import"}}
+	"gorm.io/driver/mysql"
+{{end}}
+
+{{define "db_connection"}}
+	dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+   conn := mysql.Open(dsn)
+{{end}}

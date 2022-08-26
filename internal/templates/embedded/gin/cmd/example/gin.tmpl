@@ -1,0 +1,25 @@
+{{define "server_imports"}}
+	"github.com/gin-gonic/gin"
+{{end}}
+
+{{define "make_router"}}
+	r := gin.Default()
+{{end}}
+
+{{define "start_server"}}
+	err = r.Run(":4000")
+{{end}}
+
+{{define "makeRoutes_func"}}
+func makeRoutes(r *gin.Engine, handler *handlers.GinHelloWorldHandler){
+	v1 := r.Group("/v1")
+	{
+		helloworld := v1.Group("/helloworld")
+		{
+			helloworld.POST("", handler.Greet())
+			helloworld.GET("", handler.ListUsers())
+			helloworld.GET("/:name", handler.GetUserByName())
+		}
+	}
+}
+{{end}}
