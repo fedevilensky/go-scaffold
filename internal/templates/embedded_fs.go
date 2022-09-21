@@ -52,5 +52,5 @@ var gormMysql embed.FS
 //go:embed "embedded/gorm_postgresql.tmpl"
 var gormPostgresql embed.FS
 
-//go:embed "embedded/db_common/cmd/init_example_db" "embedded/db_common/helloworld" "embedded/db_common/internal"
+//go:embed "embedded/db_common/cmd/init_example_db" "embedded/db_common/internal"
 var commonLean embed.FS

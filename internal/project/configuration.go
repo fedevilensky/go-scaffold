@@ -99,10 +99,9 @@ func (c *Configuration) Start() (err error) {
 
 func (c *Configuration) createFolders() (err error) {
 	dirs := []string{"./internal/models",
-		"./internal/services",
-		"./internal/controllers",
-		"./internal/repositories",
-		"./internal/routers",
+		"./internal/yourpackage/services",
+		"./internal/yourpackage/handlers",
+		"./internal/yourpackage/repos",
 		"./cmd",
 		"./scripts",
 		"./docs",
