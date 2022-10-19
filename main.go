@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,8 +17,19 @@ import (
 	"github.com/fedevilensky/go-scaffold/internal/templates"
 )
 
+const (
+	projName  = "projName"
+	web       = "web"
+	db        = "dbLib"
+	removeDep = "removeDep"
+	addDep    = "addDep"
+	vendor    = "vendor"
+	build     = "build"
+)
+
 func main() {
 	var strpath string
+
 	args := os.Args[1:]
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -25,6 +37,11 @@ func main() {
 	}
 	if len(args) > 0 {
 		strpath = args[0]
+		if strpath == "help" || strpath == "h" {
+			fmt.Println("go-scaffold:                will create a new project in $PWD")
+			fmt.Println("go-scaffold <project-name>: will create a new project in $PWD/<project-name>")
+			return
+		}
 		if err := os.MkdirAll(strpath, 0755); err != nil {
 			log.Fatal(err)
 		}
@@ -275,16 +292,6 @@ func selectVendorigWithNext(proj *project.Configuration, next func() tea.Model) 
 	}
 	return inputmodels.NewRadioSelect(opts)
 }
-
-const (
-	projName  = "projName"
-	web       = "web"
-	db        = "dbLib"
-	removeDep = "removeDep"
-	addDep    = "addDep"
-	vendor    = "vendor"
-	build     = "build"
-)
 
 func showSummary(proj *project.Configuration, cursorPosition int) tea.Model {
 	var next func() tea.Model
