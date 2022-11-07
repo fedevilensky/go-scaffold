@@ -86,6 +86,9 @@ func (c *Configuration) Start() (err error) {
 			return
 		}
 	}
+
+	c.runGoFmt()
+
 	if c.DoVendor {
 		c.currentCmd = c.currentCmd + "Vendoring...\n\n"
 		err = c.vendor()
@@ -169,4 +172,8 @@ func (c *Configuration) vendor() (err error) {
 
 func colorFg(val, color string) string {
 	return termenv.String(val).Foreground(term.Color(color)).String()
+}
+
+func (c *Configuration) runGoFmt() {
+	exec.Command("go", "fmt", "./...").Run()
 }

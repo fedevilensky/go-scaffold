@@ -277,7 +277,12 @@ func showSummary(proj *project.Configuration, cursorPosition int) tea.Model {
 			}
 			return nil
 		},
-		Next: nextFunc(next),
+		// I can't use nextFunc here because I need to the closure with next
+		Next: func() (tea.Model, tea.Cmd) {
+			nextModel := next()
+			cmd := nextModel.Init()
+			return nextModel, cmd
+		},
 	}
 	return inputmodels.NewRadioSelect(opts)
 }
