@@ -2,6 +2,7 @@ package inputmodels
 
 import (
 	"fmt"
+	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -66,7 +67,7 @@ func (rs radioSelect) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if rs.cursor > 0 {
 				rs.cursor--
 			}
-		case tea.KeyHome.String():
+		case tea.KeyHome.String(), "alt+[H":
 			rs.cursor = 0
 		case tea.KeyPgUp.String():
 			rs.cursor -= 5
@@ -77,10 +78,15 @@ func (rs radioSelect) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if rs.cursor < len(rs.choices)-1 {
 				rs.cursor++
 			}
-		case tea.KeyEnd.String():
+		case tea.KeyEnd.String(), "alt+[F":
 			rs.cursor = len(rs.choices) - 1
-		case tea.KeyDown.String():
+		case tea.KeyPgDown.String():
 			rs.cursor += 5
+			if rs.cursor >= len(rs.choices) {
+				rs.cursor = len(rs.choices) - 1
+			}
+		case tea.KeyDown.String():
+			rs.cursor += 1
 			if rs.cursor >= len(rs.choices) {
 				rs.cursor = len(rs.choices) - 1
 			}
@@ -89,6 +95,11 @@ func (rs radioSelect) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return rs, tea.Quit
 			}
 			return rs.next()
+		default:
+			msgStr := msg.String()
+			log.Println(tea.Key{Runes: []int32{91, 72}, Alt: true}.String())
+			log.Println(tea.Key{Runes: []int32{91, 70}, Alt: true}.String())
+			log.Println(msgStr)
 		}
 	}
 	return rs, nil
