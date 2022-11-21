@@ -7,28 +7,28 @@ import (
 //go:embed "embedded/db_common"
 var common embed.FS
 
-//go:embed "embedded/gin"
+//go:embed "embedded/gin" "embedded/Dockerfile"
 var gin embed.FS
 
-//go:embed "embedded/gin/pkg/httphelpers" "embedded/gin/pkg/taskutils"
+//go:embed "embedded/gin/pkg/httphelpers" "embedded/gin/pkg/taskutils" "embedded/Dockerfile"
 var ginLean embed.FS
 
-//go:embed "embedded/fiber"
+//go:embed "embedded/fiber" "embedded/Dockerfile"
 var fiber embed.FS
 
-//go:embed "embedded/fiber/pkg/httphelpers" "embedded/fiber/pkg/taskutils"
+//go:embed "embedded/fiber/pkg/httphelpers" "embedded/fiber/pkg/taskutils" "embedded/Dockerfile"
 var fiberLean embed.FS
 
-//go:embed "embedded/http" "embedded/httpcommon"
+//go:embed "embedded/http" "embedded/httpcommon" "embedded/Dockerfile"
 var http embed.FS
 
-//go:embed "embedded/httpcommon"
+//go:embed "embedded/httpcommon" "embedded/Dockerfile"
 var httpLean embed.FS
 
-//go:embed "embedded/gorillamux" "embedded/httpcommon"
+//go:embed "embedded/gorillamux" "embedded/httpcommon" "embedded/Dockerfile"
 var gorillamux embed.FS
 
-//go:embed "embedded/httpcommon"
+//go:embed "embedded/httpcommon" "embedded/Dockerfile"
 var gorillamuxLean embed.FS
 
 //go:embed "embedded/sql"

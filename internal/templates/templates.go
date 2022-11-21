@@ -143,7 +143,7 @@ func createFiles(proj *project.Configuration, tmpl *template.Template, embs ...e
 			if err != nil {
 				return err
 			}
-			if !strings.HasSuffix(pathStr, ".go.tmpl") {
+			if !isOneOf(pathStr, ".go.tmpl", "Dockerfile.tmpl") {
 				return nil
 			}
 			pathParts := strings.Split(pathStr, "/")
@@ -172,4 +172,13 @@ func createFiles(proj *project.Configuration, tmpl *template.Template, embs ...e
 	}
 
 	return nil
+}
+
+func isOneOf(pathStr string, strs ...string) bool {
+	for _, str := range strs {
+		if strings.HasSuffix(pathStr, str) {
+			return true
+		}
+	}
+	return false
 }
