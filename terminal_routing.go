@@ -57,14 +57,23 @@ func selectWebLibrary(proj *project.Configuration) tea.Model {
 	next := func() tea.Model { return selectDBLibrary(proj) }
 	return selectWebLibraryWithNext(proj, next)
 }
+
 func selectWebLibraryWithNext(proj *project.Configuration, next func() tea.Model) tea.Model {
 	opts := inputmodels.RadioSelectOptions{
-		Choices: []string{"Gin", "Fiber",
-			"Gorilla/mux",
-			"net/http (and other compatible libraries)", "other"},
-		Values: []string{project.WebLibraryGin, project.WebLibraryFiber,
+		Choices: []string{
+			"Gin",
+			"Fiber",
+			"Gorilla/mux (archived, do not use unless it's a hard requirement)",
+			"net/http (and other compatible libraries)",
+			"other",
+		},
+		Values: []string{
+			project.WebLibraryGin,
+			project.WebLibraryFiber,
 			project.WebLibraryGorillamux,
-			project.WebLibraryHttp, project.WebLibraryNone},
+			project.WebLibraryHttp,
+			project.WebLibraryNone,
+		},
 		Header: "Choose your base library",
 		OnEnter: func(selected string, _ int) error {
 			switch selected {
@@ -156,10 +165,22 @@ func commonPackages(proj *project.Configuration) tea.Model {
 
 func commonPackagesWithNext(proj *project.Configuration, next func() tea.Model) tea.Model {
 	opts := inputmodels.ChoiceModelOptions{
-		Choices: []string{"Use spf13/cobra", "Use redis", "Use cleanenv",
-			"Use MongoDB", "Use AMQP"},
-		Values: []string{"github.com/spf13/cobra", "github.com/go-redis/redis", "github.com/ilyakaznacheev/cleanenv",
-			"github.com/mongodb/mongo-go-driver/mongo", "github.com/rabbitmq/amqp091-go"},
+		Choices: []string{
+			"Use spf13/cobra",
+			"Use redis",
+			"Use cleanenv",
+			"Use MongoDB",
+			"Use AMQP",
+			"Use stretchr/testify",
+		},
+		Values: []string{
+			"github.com/spf13/cobra",
+			"github.com/go-redis/redis",
+			"github.com/ilyakaznacheev/cleanenv",
+			"github.com/mongodb/mongo-go-driver/mongo",
+			"github.com/rabbitmq/amqp091-go",
+			"github/com/stretchr/testify",
+		},
 		Header: "Choose between common packages",
 		OnEnter: func(selected []inputmodels.Selection) error {
 			for _, sel := range selected {
