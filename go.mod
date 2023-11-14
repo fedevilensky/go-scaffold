@@ -1,6 +1,6 @@
 module github.com/fedevilensky/go-scaffold
 
-go 1.18
+go 1.21
 
 require (
 	github.com/charmbracelet/bubbles v0.13.0
