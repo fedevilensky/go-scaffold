@@ -9,20 +9,27 @@
 {{define "driver"}}"postgres"{{end}}
 
 {{define "init_sql"}}
-	query := `CREATE TABLE users (
-					id BIGSERIAL NOT NULL PRIMARY KEY,
-					name TEXT NOT NULL UNIQUE,
-					registered_at timestamp NOT NULL DEFAULT NOW()
-				);`
+	const query = `
+		CREATE TABLE users (
+			id BIGSERIAL NOT NULL PRIMARY KEY,
+			name TEXT NOT NULL UNIQUE,
+			registered_at timestamp NOT NULL DEFAULT NOW()
+		);
+	`
 {{end}}
 
 {{define "insert_query"}}
-	query := `INSERT INTO users (name)
-				VALUES($1)
-				ON CONFLICT(name) DO NOTHING`
+	const query = `
+		INSERT INTO users (name)
+		VALUES($1)
+		ON CONFLICT(name) DO NOTHING
+	`
 {{end}}
 
 {{define "get_user_query"}}
-	query := `SELECT name, id, registered_at FROM users
-				WHERE name = $1`
+	const query = `
+		SELECT name, id, registered_at
+		FROM users
+		WHERE name = $1
+	`
 {{end}}

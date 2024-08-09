@@ -37,6 +37,9 @@ var sql embed.FS
 //go:embed "embedded/sqlx"
 var sqlx embed.FS
 
+//go:embed "embedded/sql/cmd" "embedded/sqlscan"
+var sqlscan embed.FS
+
 //go:embed "embedded/gorm"
 var gorm embed.FS
 

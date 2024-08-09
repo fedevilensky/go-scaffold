@@ -49,6 +49,8 @@ func selectEmbs(proj *project.Configuration) []embed.FS {
 			embs = append(embs, sql)
 		case project.DBLibrarySqlx:
 			embs = append(embs, sqlx)
+		case project.DBLibrarySqlscan:
+			embs = append(embs, sqlscan)
 		}
 
 		switch proj.DBProvider {
@@ -101,7 +103,6 @@ func isFullProject(proj *project.Configuration) bool {
 
 func buildTemplate(proj *project.Configuration, embs ...embed.FS) error {
 	tmpl, err := createTemplate(embs...)
-
 	if err != nil {
 		return err
 	}
@@ -150,7 +151,7 @@ func createFiles(proj *project.Configuration, tmpl *template.Template, embs ...e
 			destPath := strings.Join(pathParts[2:], "/")
 			destPath = strings.TrimRight(destPath, ".tmpl")
 			templateName := path.Base(pathStr)
-			err = os.MkdirAll(path.Dir(destPath), 0755)
+			err = os.MkdirAll(path.Dir(destPath), 0o755)
 			if err != nil {
 				panic(err)
 			}

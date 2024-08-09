@@ -9,10 +9,11 @@ const (
 )
 
 const (
-	DBLibraryGorm = "gorm.io/gorm"
-	DBLibrarySql  = "database/sql"
-	DBLibrarySqlx = "github.com/jmoiron/sqlx"
-	DBLibraryNone = ""
+	DBLibraryGorm    = "gorm.io/gorm"
+	DBLibrarySql     = "database/sql"
+	DBLibrarySqlx    = "github.com/jmoiron/sqlx"
+	DBLibrarySqlscan = "github.com/georgysavva/scany/v2/sqlscan"
+	DBLibraryNone    = ""
 )
 
 const (

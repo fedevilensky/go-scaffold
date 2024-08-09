@@ -63,7 +63,7 @@ func selectWebLibraryWithNext(proj *project.Configuration, next func() tea.Model
 		Choices: []string{
 			"Gin",
 			"Fiber",
-			"Gorilla/mux (archived, do not use unless it's a hard requirement)",
+			"Gorilla/mux",
 			"net/http (and other compatible libraries)",
 			"other",
 		},
@@ -105,7 +105,7 @@ func selectDBLibraryWithNext(proj *project.Configuration, next func() tea.Model)
 		switch proj.DBLibrary {
 		case project.DBLibraryGorm:
 			return selectGormDBProviderWithNext(proj, next)
-		case project.DBLibrarySql, project.DBLibrarySqlx:
+		case project.DBLibrarySql, project.DBLibrarySqlx, project.DBLibrarySqlscan:
 			return selectDBProviderWithNext(proj, next)
 		default:
 			return next()
@@ -113,9 +113,21 @@ func selectDBLibraryWithNext(proj *project.Configuration, next func() tea.Model)
 	}
 
 	opts := inputmodels.RadioSelectOptions{
-		Header:  "Select a db library",
-		Choices: []string{"sql", "sqlx", "gorm", "None"},
-		Values:  []string{project.DBLibrarySql, project.DBLibrarySqlx, project.DBLibraryGorm, project.DBLibraryNone},
+		Header: "Select a db library",
+		Choices: []string{
+			"sql",
+			"sqlscan",
+			"sqlx (it is recommended to use sqlscan instead, it's better maintained)",
+			"gorm",
+			"None",
+		},
+		Values: []string{
+			project.DBLibrarySql,
+			project.DBLibrarySqlscan,
+			project.DBLibrarySqlx,
+			project.DBLibraryGorm,
+			project.DBLibraryNone,
+		},
 		OnEnter: func(selection string, _ int) error {
 			proj.DBLibrary = selection
 			return nil
